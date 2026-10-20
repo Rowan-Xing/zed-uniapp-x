@@ -68,6 +68,7 @@ jobs:
             test-results/**/report.json
             test-results/**/validation.json
             test-results/**/validation.log
+            test-results/**/extract.log
           if-no-files-found: warn
           retention-days: 14
       - name: Save verified build artifacts

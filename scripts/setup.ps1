@@ -93,8 +93,13 @@ if ($Install) {
         }
     }
     New-Item -ItemType Directory -Force -Path $installRoot | Out-Null
-    foreach ($item in @('extension.toml', 'extension.wasm', 'languages', 'grammars', 'licenses', 'LICENSE', 'THIRD_PARTY_NOTICES.md')) {
+    foreach ($item in @('extension.toml', 'extension.wasm', 'languages', 'licenses', 'LICENSE', 'THIRD_PARTY_NOTICES.md')) {
         Copy-Item -LiteralPath (Join-Path $sourceRoot $item) -Destination $installRoot -Recurse -Force
+    }
+    $installedGrammars = Join-Path $installRoot 'grammars'
+    New-Item -ItemType Directory -Force -Path $installedGrammars | Out-Null
+    foreach ($grammar in @('vue.wasm', 'typescript.wasm')) {
+        Copy-Item -LiteralPath (Join-Path $sourceRoot "grammars\$grammar") -Destination $installedGrammars -Force
     }
     Write-Host "Installed local extension: $installRoot"
     Write-Host 'In Zed, run "zed: reload extensions" from the command palette, or reopen Zed.'

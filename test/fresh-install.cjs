@@ -44,4 +44,14 @@ const metadata = require('../bridge-release.json');
   };
   fs.writeFileSync(path.join(root, 'report.json'), JSON.stringify(report, null, 2));
   console.log(`PASS packaged fresh installation\nREPORT ${path.join(root, 'report.json')}`);
-})().catch(error => { console.error(error); process.exitCode = 1; });
+})().catch(error => {
+  console.error(error);
+  const sessions = path.join(root, '状态 with spaces', 'runtime-releases');
+  if (fs.existsSync(sessions)) {
+    for (const session of fs.readdirSync(sessions)) {
+      const log = path.join(sessions, session, 'extract.log');
+      if (fs.existsSync(log)) console.error(fs.readFileSync(log, 'utf8'));
+    }
+  }
+  process.exitCode = 1;
+});
