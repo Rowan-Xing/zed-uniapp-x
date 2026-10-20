@@ -13,8 +13,9 @@ The project reuses DCloud's local semantics to support uni-app x editing in Zed.
 
 ## Release 0.3
 
-- [ ] Complete fresh-install and editor validation on the submitted code.
-- [ ] Publish the checksum-pinned bridge asset.
+- [x] Complete fresh-install and update lifecycle validation locally and in Windows CI.
+- [ ] Complete editor validation on the submitted code.
+- [x] Publish and verify the checksum-pinned bridge asset.
 - [ ] Submit and address review of the Zed registry PR.
 
 ## Follow-up work
