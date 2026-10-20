@@ -1,9 +1,9 @@
 id = "uniapp-x"
 name = "uni-app x"
-version = "0.2.0"
+version = "0.3.0"
 schema_version = 1
 authors = ["Rowan-Xing"]
-description = "An independent Zed port of DCloud's official uni-app x language services for UTS and UVUE."
+description = "A Zed port of DCloud's official uni-app x language services for UTS and UVUE."
 repository = "https://github.com/Rowan-Xing/zed-uniapp-x"
 languages = ["languages/uts", "languages/uvue"]
 
@@ -18,4 +18,9 @@ language_ids = { UTS = "uts", UVUE = "uvue" }
 
 [grammars.vue]
 repository = "https://github.com/tree-sitter-grammars/tree-sitter-vue"
-rev = "7e48557b903a9db9c38cea3b7839ef7e1f36c693"
+commit = "7e48557b903a9db9c38cea3b7839ef7e1f36c693"
+
+[grammars.typescript]
+repository = "https://github.com/tree-sitter/tree-sitter-typescript"
+commit = "75b3874edb2dc714fb1fd77a32013d0f8699989f"
+path = "typescript"

@@ -29,7 +29,7 @@ class TsClient extends EventEmitter {
       cwd: options.root,
       windowsHide: true,
       stdio: ['pipe', 'pipe', 'pipe'],
-      env: { ...process.env, UNIAPP_X_DCLOUD_VERSION: options.version },
+      env: { ...(options.env || process.env), UNIAPP_X_DCLOUD_VERSION: options.version },
     });
     this.child.stderr.on('data', chunk => this.emit('log', chunk.toString()));
     this.child.stdout.on('data', chunk => this.read(chunk));

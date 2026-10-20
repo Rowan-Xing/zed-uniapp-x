@@ -1,45 +1,29 @@
-# 维护路线图
+# Roadmap
 
-目标：在 Zed 中可靠地编辑 uni-app x，持续复用官方本地语义服务。
-以下是维护优先级，不是已经实现的能力或发布日期承诺。
+The project reuses DCloud's local semantics to support uni-app x editing in Zed.
 
-## 已完成：0.1.0 基线
+## Implemented
 
-- [x] UTS、UVUE 普通 script 和 script setup 的 API 补全、详情、定义与悬停。
-- [x] 官方类型诊断和未保存修改后的诊断更新。
-- [x] 26 项真实运行时集成检查，覆盖增量更新、CRLF、UTF-16 和退出。
-- [x] Windows Zed 中验证 UTS 与 script setup 的补全、F12 和红线。
-- [x] 独立 Git 仓库、构建/检查入口、维护文档和 CI 配置。
+- UTS and UVUE completion, details, definitions, hover, and type diagnostics.
+- Ordinary script and script setup; diagnostics after unsaved edits.
+- Real-runtime regression tests, isolated fixtures, and Windows CI.
+- Stable-runtime discovery, checksum checks, validation before activation, and rollback.
+- Zed API downloads for the versioned bridge and official runtime.
+- First-launch installation, explicit grammar declarations, and English user documentation.
 
-## 下一阶段：0.2 稳定性
+## Release 0.3
 
-- [x] 官方稳定版后台检查、包校验、真实测试通过后切换及保留历史。
-- [x] 回退命令、回退后暂停更新、状态查询及恢复更新。
-- [x] 更新失败/并发测试和真实包升级回退演练纳入 CI。
-- [ ] 补齐服务启动失败、崩溃重启、缺失运行时和配置错误的可理解提示。
-- [ ] 核验多工作区、CLI `src` 布局、路径含空格和中文的真实项目。
-- [ ] 验证文件重命名、删除、外部修改和依赖变化后的索引更新。
-- [ ] 连续编辑与大项目测试，记录内存、延迟和子进程退出情况。
-- [ ] 与官方 Vue 扩展同时安装，验证 `.vue`、`.uvue`、`.uts` 的分工。
+- [ ] Complete fresh-install and editor validation on the submitted code.
+- [ ] Publish the checksum-pinned bridge asset.
+- [ ] Submit and address review of the Zed registry PR.
 
-验收：每个修复有可复现用例；原有 26 项继续通过；记录真实项目和
-Zed 界面验证结果；不把未经验证的目标平台列为已支持。
+## Follow-up work
 
-## 后续：编辑能力与目标平台
+- More real projects: CLI src layout, multi-root workspaces, file changes, and long sessions.
+- Full coexistence testing with the Vue extension.
+- Template attributes/events, CSS, platform-native types, and refactoring.
+- iOS, Web, and HarmonyOS target coverage.
+- macOS/Linux installation and runtime validation before claiming host support.
+- UTS-specific grammar coverage and large-project performance measurements.
 
-- [ ] 验证并补齐模板标签、属性、事件、组件定义跳转及样式能力。
-- [ ] 明确 auto-import、重命名、代码修复的可用范围并增加用例。
-- [ ] 分别验证 Android、iOS、Web、HarmonyOS 的官方类型与平台差异。
-- [ ] 评估 UTS 特有语法的高亮和语法树适配。
-- [ ] 加入 macOS/Linux 安装与运行验证，再声明对应系统支持。
-
-## 发布准备
-
-- [x] 建立 [GitHub 远端仓库](https://github.com/Rowan-Xing/zed-uniapp-x)。
-- [ ] 完善扩展市场所需的正式元数据。
-- [x] 首次安装、自动语言服务升级和回退流程（Windows）。
-- [ ] 扩展市场安装与插件本身的自动更新。
-- [ ] 建立发布包、校验文件和版本对应的验证记录。
-- [ ] 验证扩展市场的安装路径，再提交 Zed 扩展市场。
-
-运行、真机调试和编译打包属于独立集成，目前不包含在语言服务里程碑内。
+Build, run, packaging, and device debugging require separate integrations.

@@ -11,10 +11,13 @@ try {
   }
   const root = args[rootIndex + 1];
   const override = overrideIndex < 0 ? undefined : args[overrideIndex + 1];
+  if (overrideIndex >= 0 && !path.isAbsolute(override || '')) {
+    throw new Error('runtimePath must be an absolute DCloud extension directory.');
+  }
   const runtime = selectRuntime(root, override);
   if (overrideIndex < 0) args.push('--runtime', runtime, '--managed-runtime');
   require('./server.cjs');
 } catch (error) {
-  process.stderr.write(`uni-app x: ${error.message}\nRun scripts/setup.ps1 to prepare the runtime.\n`);
+  process.stderr.write(`uni-app x: ${error.message}\nRestart the language server to retry installation. See the uni-app x README for recovery steps.\n`);
   process.exitCode = 1;
 }

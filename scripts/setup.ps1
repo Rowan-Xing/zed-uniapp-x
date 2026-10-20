@@ -4,11 +4,14 @@ param(
     [string]$VsixPath,
     [string]$ZedDataDirectory = (Join-Path $env:LOCALAPPDATA 'Zed'),
     [string]$NodeCommand = 'node',
+    [switch]$ExtensionOnly,
     [switch]$Install
 )
 $ErrorActionPreference = 'Stop'
 $ProgressPreference = 'SilentlyContinue'
 $sourceRoot = Split-Path -Parent $PSScriptRoot
+if ($ExtensionOnly -and -not $Install) { throw '-ExtensionOnly requires -Install.' }
+if (-not $ExtensionOnly) {
 $cacheRoot = Join-Path $ZedDataDirectory 'extensions\work\uniapp-x'
 $policy = Get-Content -LiteralPath (Join-Path $sourceRoot 'server\runtime-policy.json') -Raw | ConvertFrom-Json
 $expectedHash = $policy.bootstrapSha256
@@ -44,9 +47,8 @@ if (-not $RuntimePath) {
         if ((Get-FileHash -LiteralPath $VsixPath -Algorithm SHA256).Hash.ToLowerInvariant() -ne $expectedHash) {
             throw "DCloud VSIX checksum mismatch: $VsixPath"
         }
-        Add-Type -AssemblyName System.IO.Compression.FileSystem
         Write-Host "Extracting the verified runtime to $runtimeContainer..."
-        [System.IO.Compression.ZipFile]::ExtractToDirectory($VsixPath, $runtimeContainer)
+        & (Join-Path $sourceRoot 'server\extract-runtime.ps1') -Archive $VsixPath -Destination $runtimeContainer
     }
 }
 $RuntimePath = (Resolve-Path -LiteralPath $RuntimePath).Path
@@ -70,9 +72,10 @@ if (-not $hasManagedState) {
 }
 & $NodeCommand (Join-Path $sourceRoot 'server\runtime-update.cjs') init --state-dir $cacheRoot --runtime $RuntimePath
 if ($LASTEXITCODE -ne 0) { throw 'Runtime state initialization failed.' }
+}
 
 if ($Install) {
-    foreach ($required in @('extension.wasm', 'grammars\vue.wasm')) {
+    foreach ($required in @('extension.wasm', 'grammars\vue.wasm', 'grammars\typescript.wasm')) {
         if (-not (Test-Path -LiteralPath (Join-Path $sourceRoot $required))) {
             throw "Missing $required. Build the extension first; see README.md."
         }
@@ -93,8 +96,10 @@ if ($Install) {
     foreach ($item in @('extension.toml', 'extension.wasm', 'languages', 'grammars', 'licenses', 'LICENSE', 'THIRD_PARTY_NOTICES.md')) {
         Copy-Item -LiteralPath (Join-Path $sourceRoot $item) -Destination $installRoot -Recurse -Force
     }
-    Write-Host "Installed local prototype: $installRoot"
+    Write-Host "Installed local extension: $installRoot"
     Write-Host 'In Zed, run "zed: reload extensions" from the command palette, or reopen Zed.'
 }
-Write-Host "DCloud local runtime: $RuntimePath"
-Write-Host "Runtime state: $stateFile"
+if (-not $ExtensionOnly) {
+    Write-Host "DCloud local runtime: $RuntimePath"
+    Write-Host "Runtime state: $stateFile"
+}

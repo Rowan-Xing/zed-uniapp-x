@@ -48,7 +48,7 @@ try {
         return
     }
     Write-Host 'Checking update transactions, failure isolation, and rollback...'
-    & $NodeCommand --test (Join-Path $sourceRoot 'test\runtime-update.test.cjs')
+    & $NodeCommand --test (Join-Path $sourceRoot 'test\runtime-update.test.cjs') (Join-Path $sourceRoot 'test\installer.test.cjs')
     if ($LASTEXITCODE -ne 0) { throw 'Runtime update tests failed.' }
 
     if (-not $RuntimePath -and $env:LOCALAPPDATA) {

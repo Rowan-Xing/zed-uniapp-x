@@ -1,13 +1,13 @@
 {
-  "name": "zed-uniapp-x-local-prototype",
+  "name": "zed-uniapp-x-bridge",
   "private": true,
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Zed LSP bridge to DCloud's local uni-app x language service",
   "scripts": {
     "test": "node test/integration.cjs",
-    "test:updater": "node --test test/runtime-update.test.cjs"
+    "test:updater": "node --test test/runtime-update.test.cjs test/installer.test.cjs"
   },
   "engines": {
-    "node": ">=18"
+    "node": ">=22"
   }
 }

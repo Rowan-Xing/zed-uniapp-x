@@ -3,12 +3,14 @@
 const path = require('node:path');
 const { fork } = require('node:child_process');
 
-function startAutoUpdate(root, log, updated) {
+function startAutoUpdate(root, log, updated, discoverOnly = false) {
   let worker, stopped = false;
   const check = () => {
     if (stopped || worker) return;
     let output = '';
-    worker = fork(path.join(__dirname, 'runtime-update.cjs'), ['check', '--state-dir', root, '--auto'], {
+    worker = fork(path.join(__dirname, 'runtime-update.cjs'), [
+      'check', '--state-dir', root, '--auto', ...(discoverOnly ? ['--discover-only'] : []),
+    ], {
       windowsHide: true, stdio: ['ignore', 'pipe', 'pipe', 'ipc'],
     });
     worker.stdout.on('data', chunk => { output = (output + chunk).slice(-65536); });
@@ -19,7 +21,7 @@ function startAutoUpdate(root, log, updated) {
       if (code === 0 && !stopped) {
         try {
           const result = JSON.parse(output);
-          if (result.status === 'updated') updated(result);
+          if (['updated', 'available'].includes(result.status)) updated(result);
           else if (!['not-due', 'busy', 'paused'].includes(result.status)) {
             log(`Runtime update: ${result.status}${result.available ? ` (${result.available})` : ''}`);
           }

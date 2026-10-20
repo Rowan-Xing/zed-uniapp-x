@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+## 0.3.0 — 2026-10-20
+
+- First-launch installation through Zed's extension API, with a separately versioned bridge archive.
+- SHA-256 verification and 26 real checks before first runtime activation.
+- Background discovery queues updates for download and validation at the next language-server start.
+- Explicit pinned TypeScript and Vue grammars, compiled from source.
+- English installation, configuration, maintenance, and publishing documentation; Chinese README retained.
+- Clear Windows host support and installer failure messages.
+
 ## 0.2.0 — 2026-10-20
 
 - 在 Zed 使用期间每天后台检查官方稳定版，独立下载并校验 SHA-256。

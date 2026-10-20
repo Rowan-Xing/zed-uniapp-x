@@ -28,6 +28,10 @@ jobs:
         with:
           node-version: '24'
           package-manager-cache: false
+      - name: Verify reproducible bridge release
+        run: |
+          python scripts/package_bridge.py --check
+          if ($LASTEXITCODE -ne 0) { throw 'Bridge release metadata differs from source.' }
       - name: Prepare Rust
         run: |
           rustup toolchain install stable --profile minimal --component rustfmt --target wasm32-wasip2
@@ -48,6 +52,13 @@ jobs:
           $vsix = Join-Path $cache "dcloud-language-services-$($policy.bootstrapVersion).vsix"
           node test/update-lifecycle.cjs --runtime $state.active.path --vsix $vsix --work test-results
           if ($LASTEXITCODE -ne 0) { throw 'Real runtime update lifecycle failed.' }
+      - name: Verify packaged bridge and first launch from an empty work directory
+        run: |
+          $policy = Get-Content -LiteralPath 'server\runtime-policy.json' -Raw | ConvertFrom-Json
+          $version = (Get-Content -LiteralPath package.json -Raw | ConvertFrom-Json).version
+          $vsix = Join-Path $env:RUNNER_TEMP "uniapp-x-zed\extensions\work\uniapp-x\dcloud-language-services-$($policy.bootstrapVersion).vsix"
+          node test/fresh-install.cjs --bridge "dist/uniapp-x-bridge-$version.tar.gz" --vsix $vsix --work test-results
+          if ($LASTEXITCODE -ne 0) { throw 'Packaged fresh installation failed.' }
       - name: Save test reports
         if: always()
         uses: actions/upload-artifact@v7
@@ -58,4 +69,14 @@ jobs:
             test-results/**/validation.json
             test-results/**/validation.log
           if-no-files-found: warn
+          retention-days: 14
+      - name: Save verified build artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: extension-build
+          path: |
+            extension.wasm
+            grammars/*.wasm
+            dist/uniapp-x-bridge-*.tar.gz*
+            bridge-release.json
           retention-days: 14

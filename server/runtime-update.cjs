@@ -69,7 +69,7 @@ async function fileHash(file) {
 function bridgeFingerprint() {
   const hash = createHash('sha256');
   for (const file of ['server.cjs', 'ts-client.cjs', 'dcloud-compat.cjs', 'runtime-store.cjs',
-    'runtime-policy.json', 'runtime-update.cjs', 'extract-runtime.ps1', '../test/integration.cjs']) {
+    'runtime-policy.json', 'runtime-update.cjs', 'installer.cjs', 'extract-runtime.ps1', '../test/integration.cjs']) {
     hash.update(fs.readFileSync(path.join(__dirname, file)));
   }
   const visit = directory => {
@@ -169,6 +169,7 @@ async function check(root, options = {}, dependencies = {}) {
     versionParts(release.version);
     const comparison = compareVersions(release.version, state.active.version);
     if (comparison < 0 || (comparison === 0 && !options.revalidate)) {
+      state.pendingRelease = null;
       state.lastResult = { status: 'current', available: release.version, at: new Date().toISOString() };
       saveState(root, state);
       return { ...state.lastResult, active: state.active.version };
@@ -177,6 +178,12 @@ async function check(root, options = {}, dependencies = {}) {
     if (options.automatic && !options.force && state.failedCandidate?.version === release.version &&
         state.failedCandidate.sha256 === release.sha256 && state.failedCandidate.bridge === fingerprint) {
       return { status: 'previously-failed', version: release.version };
+    }
+    if (options.discoverOnly) {
+      state.pendingRelease = release;
+      state.lastResult = { status: 'available', version: release.version, at: new Date().toISOString() };
+      saveState(root, state);
+      return state.lastResult;
     }
     session = path.join(root, 'runtime-releases', `${release.version}-${randomUUID()}`);
     fs.mkdirSync(session, { recursive: true });
@@ -195,6 +202,7 @@ async function check(root, options = {}, dependencies = {}) {
       validatedAt: new Date().toISOString(), bridge: fingerprint, report,
     });
     nextState.failedCandidate = null;
+    nextState.pendingRelease = null;
     nextState.lastResult = { status: 'updated', version: release.version, at: new Date().toISOString(), report };
     fs.writeFileSync(path.join(session, 'after.json'), JSON.stringify(nextState, null, 2));
     saveState(root, nextState);
@@ -254,6 +262,7 @@ async function main() {
       runtime: value('--runtime'), version: value('--version'), vsix: value('--vsix'),
       automatic: args.includes('--auto'), force: args.includes('--force'),
       revalidate: args.includes('--revalidate'), signal: controller.signal,
+      discoverOnly: args.includes('--discover-only'),
     };
     if (action === 'status') result = loadState(root) || initialState(root, options.runtime);
     else if (action === 'check') result = await check(root, options);

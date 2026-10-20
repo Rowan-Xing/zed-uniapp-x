@@ -1,6 +1,6 @@
 # Third-party components
 
-This is an independent local prototype, not an official DCloud or Zed release.
+This extension adapts DCloud's local uni-app x language services to Zed.
 
 ## DCloud HBuilderX Language Services (bootstrap: 4.87.0)
 
@@ -37,8 +37,8 @@ tests before activation.
 - https://github.com/tree-sitter/tree-sitter-typescript
 - MIT, Copyright (c) 2017 Max Brunsfeld
 - License: `licenses/tree-sitter-typescript-MIT.txt`
-- The extension uses Zed's built-in `typescript` grammar. No TypeScript grammar
-  binary is bundled here; its exact version follows the installed Zed version.
+- Revision: `75b3874edb2dc714fb1fd77a32013d0f8699989f`, subdirectory `typescript`.
+- Zed builds the grammar from the revision in `extension.toml`.
 
 ## Tree-sitter Vue
 
@@ -46,11 +46,10 @@ tests before activation.
 - Revision: `7e48557b903a9db9c38cea3b7839ef7e1f36c693`
 - MIT, Copyright (c) Ika
 - License: `licenses/tree-sitter-vue-MIT.txt`
-- `grammars/vue.wasm` is taken from the official Zed Vue extension 0.4.1,
-  whose manifest pins this revision.
-- Distribution: https://api.zed.dev/extensions/vue/0.4.1/download
-- Grammar SHA-256:
-  `d654acab62559507d310262b8254afaacba6243edecdfb12d578cfc531ee431b`
+- Zed builds the grammar from the revision in `extension.toml`.
+- The 0.1/0.2 local prototypes used a precompiled grammar from the Zed Vue 0.4.1
+  distribution, with SHA-256
+  `d654acab62559507d310262b8254afaacba6243edecdfb12d578cfc531ee431b`.
 
 ## Zed Vue extension queries
 

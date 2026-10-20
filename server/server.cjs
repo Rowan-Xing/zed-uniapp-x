@@ -12,6 +12,16 @@ const { startAutoUpdate } = require('./auto-update.cjs');
 
 const runtimeArg = process.argv.indexOf('--runtime');
 const runtime = path.resolve(runtimeArg >= 0 ? process.argv[runtimeArg + 1] : process.env.UNIAPP_X_RUNTIME || '');
+const stateArg = process.argv.indexOf('--state-dir');
+const dataRoot = stateArg >= 0
+  ? path.join(process.argv[stateArg + 1], 'service-data')
+  : path.join(path.dirname(runtime), 'data');
+fs.mkdirSync(path.join(dataRoot, 'HBuilder X'), { recursive: true });
+// DCloud's indexer uses APPDATA/HOME rather than the tsserver data-dir flag.
+// Scope these variables to its child processes so caches stay with the extension.
+const runtimeEnvironment = {
+  ...process.env, APPDATA: dataRoot, LOCALAPPDATA: dataRoot, HOME: dataRoot, USERPROFILE: dataRoot,
+};
 let runtimePackage;
 try {
   runtimePackage = validateRuntime(runtime);
@@ -96,7 +106,7 @@ function collectIndexProcessors() {
 async function startIndex(pipeName) {
   indexChild = spawn(process.execPath, [
     path.join(runtime, 'indexservice/out/server/server.js'), '--stdio',
-  ], { cwd: root, windowsHide: true, stdio: ['pipe', 'pipe', 'pipe'] });
+  ], { cwd: root, windowsHide: true, stdio: ['pipe', 'pipe', 'pipe'], env: runtimeEnvironment });
   indexChild.stderr.on('data', chunk => log(`Index: ${chunk}`));
   indexChild.on('error', error => log(`Index failed: ${error.message}`));
   indexConnection = rpc.createMessageConnection(
@@ -208,7 +218,7 @@ connection.onInitialize(async params => {
     : path.join(os.tmpdir(), `zed-uniapp-x-${process.pid}.sock`);
   await startIndex(pipeName);
   ts = new TsClient(runtime, {
-    root, pipeName, dataDir: path.join(path.dirname(runtime), 'data'), locale: settings.locale,
+    root, pipeName, dataDir: dataRoot, locale: settings.locale, env: runtimeEnvironment,
     version: runtimePackage.version,
   });
   ts.on('event', receiveEvent);
@@ -217,9 +227,9 @@ connection.onInitialize(async params => {
     connection.sendNotification('window/showMessage', { type: 1, message: `${error.message} Run “Restart Language Server” to retry.` });
   });
   await configure();
-  trace('initialize', { root, runtime, version: runtimePackage.version, targets: settings.targets || 'platformConfig.json' });
+  trace('initialize', { root, runtime, dataRoot, version: runtimePackage.version, targets: settings.targets || 'platformConfig.json' });
   return {
-    serverInfo: { name: 'uni-app x (DCloud local bridge)', version: '0.2.0' },
+    serverInfo: { name: 'uni-app x (DCloud local bridge)', version: '0.3.0' },
     capabilities: {
       textDocumentSync: { openClose: true, change: lsp.TextDocumentSyncKind.Incremental, save: { includeText: false } },
       completionProvider: { triggerCharacters: ['.', '"', "'", '/', '<', ':', '@'], resolveProvider: true },
@@ -235,9 +245,11 @@ connection.onInitialized(async () => {
     stopAutoUpdate = startAutoUpdate(process.argv[stateIndex + 1], log, result => {
       connection.sendNotification('window/showMessage', {
         type: 3,
-        message: `DCloud ${result.version} passed all runtime checks and is ready. Restart the language server to use it. The previous version was retained for rollback.`,
+        message: result.status === 'available'
+          ? `DCloud ${result.version} is available. Restart the language server to let Zed download and verify it. Your current version will be kept if validation fails.`
+          : `DCloud ${result.version} passed all runtime checks and is ready. Restart the language server to use it. The previous version was retained for rollback.`,
       });
-    });
+    }, process.argv.includes('--zed-managed-downloads'));
   }
   if (!dynamicFileWatching) return;
   try {

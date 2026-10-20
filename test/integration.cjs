@@ -122,6 +122,12 @@ function record(name, detail = {}) {
     initializationOptions: { targets: ['APP-ANDROID'] },
   });
   assert.ok(initialized.capabilities.completionProvider);
+  const expectedData = stateDirectory
+    ? path.join(stateDirectory, 'service-data') : path.join(path.dirname(runtime), 'data');
+  assert.ok(fs.statSync(path.join(expectedData, 'HBuilder X')).isDirectory(), 'index cache must stay with the managed runtime');
+  const initializationTrace = fs.readFileSync(traceFile, 'utf8').trim().split('\n')
+    .map(line => JSON.parse(line)).find(entry => entry.event === 'initialize');
+  assert.equal(path.resolve(initializationTrace.dataRoot), path.resolve(expectedData));
   notify('initialized', {});
   record('LSP initialize with official DCloud runtime', initialized.serverInfo);
   for (const name of fixtureFiles) {
