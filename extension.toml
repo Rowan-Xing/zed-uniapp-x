@@ -1,9 +1,9 @@
 id = "uniapp-x"
-name = "uni-app x (Local Prototype)"
-version = "0.1.0"
+name = "uni-app x"
+version = "0.2.0"
 schema_version = 1
-authors = ["Local prototype"]
-description = "UTS and UVUE completion, definitions and diagnostics using DCloud's local language service."
+authors = ["Rowan-Xing"]
+description = "An independent Zed port of DCloud's official uni-app x language services for UTS and UVUE."
 repository = "https://github.com/Rowan-Xing/zed-uniapp-x"
 languages = ["languages/uts", "languages/uvue"]
 

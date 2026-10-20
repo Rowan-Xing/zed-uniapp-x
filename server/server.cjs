@@ -7,15 +7,14 @@ const os = require('node:os');
 const { spawn } = require('node:child_process');
 const { pathToFileURL, fileURLToPath } = require('node:url');
 const { TsClient } = require('./ts-client.cjs');
+const { validateRuntime } = require('./runtime-store.cjs');
+const { startAutoUpdate } = require('./auto-update.cjs');
 
 const runtimeArg = process.argv.indexOf('--runtime');
 const runtime = path.resolve(runtimeArg >= 0 ? process.argv[runtimeArg + 1] : process.env.UNIAPP_X_RUNTIME || '');
 let runtimePackage;
 try {
-  runtimePackage = JSON.parse(fs.readFileSync(path.join(runtime, 'package.json'), 'utf8'));
-  if (runtimePackage.name !== 'hbuilderx-language-services' || runtimePackage.version !== '4.87.0') {
-    throw new Error('Expected dcloud-ide.hbuilderx-language-services 4.87.0.');
-  }
+  runtimePackage = validateRuntime(runtime);
 } catch (error) {
   process.stderr.write(`uni-app x: invalid runtime at ${runtime}: ${error.message}\n`);
   process.exit(1);
@@ -30,6 +29,7 @@ let dynamicFileWatching = false;
 let queue = Promise.resolve();
 let diagnosticTimer;
 let diagnosticRun;
+let stopAutoUpdate;
 const dirty = new Set();
 const queuedVersions = new Map();
 const appliedTargets = new Set();
@@ -207,7 +207,10 @@ connection.onInitialize(async params => {
     ? `\\\\.\\pipe\\zed-uniapp-x-${process.pid}`
     : path.join(os.tmpdir(), `zed-uniapp-x-${process.pid}.sock`);
   await startIndex(pipeName);
-  ts = new TsClient(runtime, { root, pipeName, dataDir: path.join(path.dirname(runtime), 'data'), locale: settings.locale });
+  ts = new TsClient(runtime, {
+    root, pipeName, dataDir: path.join(path.dirname(runtime), 'data'), locale: settings.locale,
+    version: runtimePackage.version,
+  });
   ts.on('event', receiveEvent);
   ts.on('log', log);
   ts.on('fatal', error => {
@@ -216,7 +219,7 @@ connection.onInitialize(async params => {
   await configure();
   trace('initialize', { root, runtime, version: runtimePackage.version, targets: settings.targets || 'platformConfig.json' });
   return {
-    serverInfo: { name: 'uni-app x (DCloud local bridge)', version: '0.1.0' },
+    serverInfo: { name: 'uni-app x (DCloud local bridge)', version: '0.2.0' },
     capabilities: {
       textDocumentSync: { openClose: true, change: lsp.TextDocumentSyncKind.Incremental, save: { includeText: false } },
       completionProvider: { triggerCharacters: ['.', '"', "'", '/', '<', ':', '@'], resolveProvider: true },
@@ -226,6 +229,16 @@ connection.onInitialize(async params => {
   };
 });
 connection.onInitialized(async () => {
+  const stateIndex = process.argv.indexOf('--state-dir');
+  if (process.argv.includes('--managed-runtime') && stateIndex >= 0 &&
+      settings.autoUpdate !== false && process.env.UNIAPP_X_SKIP_UPDATE !== '1') {
+    stopAutoUpdate = startAutoUpdate(process.argv[stateIndex + 1], log, result => {
+      connection.sendNotification('window/showMessage', {
+        type: 3,
+        message: `DCloud ${result.version} passed all runtime checks and is ready. Restart the language server to use it. The previous version was retained for rollback.`,
+      });
+    });
+  }
   if (!dynamicFileWatching) return;
   try {
     await connection.client.register(lsp.DidChangeWatchedFilesNotification.type, {
@@ -373,6 +386,7 @@ function stop() {
   if (shuttingDown) return;
   shuttingDown = true;
   clearTimeout(diagnosticTimer);
+  stopAutoUpdate?.();
   ts?.stop();
   indexConnection?.dispose();
   indexChild?.kill();

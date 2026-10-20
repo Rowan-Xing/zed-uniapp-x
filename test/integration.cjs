@@ -12,7 +12,10 @@ const argument = (name, fallback) => {
   return i < 0 ? fallback : process.argv[i + 1];
 };
 const runtime = argument('--runtime', process.env.UNIAPP_X_RUNTIME);
-assert.ok(runtime, 'Pass --runtime <DCloud 4.87.0 extension directory>');
+assert.ok(runtime, 'Pass --runtime <official DCloud extension directory>');
+const runtimeVersion = JSON.parse(fs.readFileSync(path.join(runtime, 'package.json'), 'utf8')).version;
+const reportPath = argument('--report');
+const stateDirectory = argument('--state-dir');
 const work = path.resolve(argument('--work', '.cache/tests'));
 const session = path.join(work, `run-${Date.now()}`);
 const project = path.join(session, 'project');
@@ -26,11 +29,12 @@ for (const name of fixtureFiles) {
 }
 const traceFile = path.join(session, 'bridge.jsonl');
 const stderrFile = path.join(session, 'stderr.log');
-const child = spawn(process.execPath, [
-  path.join(__dirname, '../server/server.cjs'), '--stdio', '--runtime', runtime,
-], {
+const serverArguments = stateDirectory
+  ? [path.join(__dirname, '../server/launch.cjs'), '--stdio', '--state-dir', stateDirectory]
+  : [path.join(__dirname, '../server/server.cjs'), '--stdio', '--runtime', runtime];
+const child = spawn(process.execPath, serverArguments, {
   cwd: project, windowsHide: true, stdio: ['pipe', 'pipe', 'pipe'],
-  env: { ...process.env, UNIAPP_X_TRACE: traceFile },
+  env: { ...process.env, UNIAPP_X_TRACE: traceFile, UNIAPP_X_SKIP_UPDATE: '1' },
 });
 child.stderr.on('data', chunk => fs.appendFileSync(stderrFile, chunk));
 let buffer = Buffer.alloc(0), seq = 0;
@@ -192,11 +196,14 @@ function record(name, detail = {}) {
   });
   assert.equal(child.exitCode, 0, 'LSP must exit normally after shutdown/exit');
   record('clean LSP shutdown');
-  const report = { pass: true, runtimeVersion: '4.87.0', tests: results, logs: rpcLogs, session };
+  const report = { pass: true, runtimeVersion, runtime: path.resolve(runtime), tests: results, logs: rpcLogs, session };
   fs.writeFileSync(path.join(session, 'report.json'), JSON.stringify(report, null, 2));
+  if (reportPath) fs.writeFileSync(reportPath, JSON.stringify(report, null, 2));
   console.log(`RESULT ${results.length} checks passed\nREPORT ${path.join(session, 'report.json')}`);
 })().catch(error => {
-  fs.writeFileSync(path.join(session, 'report.json'), JSON.stringify({ pass: false, error: error.stack, tests: results, logs: rpcLogs }, null, 2));
+  const report = { pass: false, runtimeVersion, error: error.stack, tests: results, logs: rpcLogs };
+  fs.writeFileSync(path.join(session, 'report.json'), JSON.stringify(report, null, 2));
+  if (reportPath) fs.writeFileSync(reportPath, JSON.stringify(report, null, 2));
   console.error(error.stack, `\nREPORT ${path.join(session, 'report.json')}`);
   process.exitCode = 1;
 }).finally(() => {

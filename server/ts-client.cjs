@@ -21,7 +21,7 @@ class TsClient extends EventEmitter {
       '--indexServerType', 'semantic',
       '--indexServerPipeName', options.pipeName,
       '--clientProcessId', String(process.pid),
-      '--appVersion', '4.87.0',
+      '--appVersion', options.version,
       '--locale', options.locale || 'en',
       '--vscodeEnvAppData', options.dataDir,
     ];
@@ -29,6 +29,7 @@ class TsClient extends EventEmitter {
       cwd: options.root,
       windowsHide: true,
       stdio: ['pipe', 'pipe', 'pipe'],
+      env: { ...process.env, UNIAPP_X_DCLOUD_VERSION: options.version },
     });
     this.child.stderr.on('data', chunk => this.emit('log', chunk.toString()));
     this.child.stdout.on('data', chunk => this.read(chunk));

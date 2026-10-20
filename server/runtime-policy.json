@@ -1,0 +1,9 @@
+{
+  "namespace": "dcloud-ide",
+  "name": "hbuilderx-language-services",
+  "registry": "https://open-vsx.org/api/dcloud-ide/hbuilderx-language-services",
+  "bootstrapVersion": "4.87.0",
+  "bootstrapSha256": "d8d0e7838881ed810aa15ecbe3d1466aefa3c6b56d46e1a5695446e597ff5d51",
+  "checkIntervalHours": 24,
+  "minimumChecks": 26
+}

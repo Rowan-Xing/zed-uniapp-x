@@ -2,12 +2,14 @@
 
 This is an independent local prototype, not an official DCloud or Zed release.
 
-## DCloud HBuilderX Language Services 4.87.0
+## DCloud HBuilderX Language Services (bootstrap: 4.87.0)
 
 The installer downloads the unmodified `dcloud-ide.hbuilderx-language-services`
 VSIX from Open VSX. It is not bundled in this source/package.
 
-- Source/project: https://github.com/dcloudio/hbuilderx-language-services
+- Project link: https://github.com/dcloudio/hbuilderx-language-services
+  (the default branch contained only its README when checked on 2026-10-20;
+  this project consumes the published JavaScript distribution, not a source build).
 - Distribution: https://open-vsx.org/extension/dcloud-ide/hbuilderx-language-services
 - Package license declaration: Apache-2.0
 - Full package license: `LICENSE.txt` inside the downloaded extension.
@@ -16,11 +18,19 @@ VSIX from Open VSX. It is not bundled in this source/package.
 - SHA-256:
   `d8d0e7838881ed810aa15ecbe3d1466aefa3c6b56d46e1a5695446e597ff5d51`
 
-`server/dcloud-compat.cjs` applies a narrowly scoped, version-pinned in-memory
+The updater downloads stable releases from the same publisher, checks the
+registry's SHA-256 and package identity, preserves the original license files,
+and runs the real regression suite before selecting the candidate.
+Each candidate's version, URL, checksum and test receipt remain in its local directory.
+
+`server/dcloud-compat.cjs` applies a narrowly scoped, expression-matched in-memory
 change to DCloud's `vueservice/packages/vue-typescript/out/sourceFile.js`:
 `getScript()` falls back to `scriptSetup` when there is no normal script block.
 The original file is not changed. This restores the tested `<script setup>`
 diagnostic path; it is not a replacement implementation of DCloud's checker.
+The known expression must match exactly once for 4.87.0. Future versions with a
+different getter run without the patch and must pass the same setup diagnostics
+tests before activation.
 
 ## Tree-sitter TypeScript
 

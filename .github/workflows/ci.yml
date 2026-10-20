@@ -37,13 +37,25 @@ jobs:
           .\scripts\setup.ps1 -ZedDataDirectory (Join-Path $env:RUNNER_TEMP 'uniapp-x-zed')
       - name: Check syntax, build WASM, and run real language-service tests
         run: |
-          $pointer = Join-Path $env:RUNNER_TEMP 'uniapp-x-zed\extensions\work\uniapp-x\runtime-path.txt'
-          .\scripts\check.ps1 -RuntimePath (Get-Content -LiteralPath $pointer -Raw).Trim()
+          $stateFile = Join-Path $env:RUNNER_TEMP 'uniapp-x-zed\extensions\work\uniapp-x\runtime-state.json'
+          $runtime = (Get-Content -LiteralPath $stateFile -Raw | ConvertFrom-Json).active.path
+          .\scripts\check.ps1 -RuntimePath $runtime
+      - name: Verify official package update, failure rejection, rollback, and managed launch
+        run: |
+          $cache = Join-Path $env:RUNNER_TEMP 'uniapp-x-zed\extensions\work\uniapp-x'
+          $state = Get-Content -LiteralPath (Join-Path $cache 'runtime-state.json') -Raw | ConvertFrom-Json
+          $policy = Get-Content -LiteralPath 'server\runtime-policy.json' -Raw | ConvertFrom-Json
+          $vsix = Join-Path $cache "dcloud-language-services-$($policy.bootstrapVersion).vsix"
+          node test/update-lifecycle.cjs --runtime $state.active.path --vsix $vsix --work test-results
+          if ($LASTEXITCODE -ne 0) { throw 'Real runtime update lifecycle failed.' }
       - name: Save test reports
         if: always()
         uses: actions/upload-artifact@v7
         with:
           name: integration-reports
-          path: test-results/**/report.json
+          path: |
+            test-results/**/report.json
+            test-results/**/validation.json
+            test-results/**/validation.log
           if-no-files-found: warn
           retention-days: 14

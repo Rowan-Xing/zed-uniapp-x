@@ -1,7 +1,7 @@
 # 开发与维护
 
 本仓库维护 Zed 接入层和 LSP 桥接，语义能力复用 DCloud 官方本地语言服务。
-当前基线为 `v0.1.0`；还处于原型阶段。功能计划见 [ROADMAP.md](ROADMAP.md)，
+历史基线为 `v0.1.0`，当前开发版本为 `0.2.0`；还处于原型阶段。功能计划见 [ROADMAP.md](ROADMAP.md)，
 历史变化见 [CHANGELOG.md](CHANGELOG.md)。
 
 ## 环境与日常流程
@@ -36,7 +36,9 @@ rustfmt 和 `wasm32-wasip2` 目标；Cargo 依赖由 `Cargo.lock` 锁定。
 `-TestDirectory` 可以指定构建缓存与测试输出目录。
 集成报告在 `test-results/run-*/report.json`；这些文件和日志不入 Git。
 
-修改 `server/*.cjs` 后必须重建 WASM，因为 Rust 用 `include_str!` 嵌入脚本。
+修改 `server/`、`test/integration.cjs` 或 `test/fixtures/demo/` 后必须重建 WASM，
+因为 Rust 用 `include_str!` 嵌入启动文件及本机自动升级所需的测试。
+新增运行文件或样例后同步检查 `src/lib.rs` 中的资源列表。
 覆盖安装后，在 Zed 命令面板执行 `editor: restart language server`。
 更改语法配置或启动流程时，需另外实际验证语法高亮、补全菜单、F12、
 错误红线及未保存修改后的清错。协议测试无法替代这一步。
@@ -49,9 +51,15 @@ rustfmt 和 `wasm32-wasip2` 目标；Cargo 依赖由 `Cargo.lock` 锁定。
 | `server/server.cjs` | LSP 请求、文档同步、完成项和诊断转换 |
 | `server/ts-client.cjs` | DCloud tsserver 子进程、请求队列、事件与生命周期 |
 | `server/dcloud-compat.cjs` | 4.87.0 的 script setup 诊断兼容补丁 |
+| `server/runtime-policy.json` | 官方发布渠道、首次安装版本、固定哈希与检查间隔 |
+| `server/runtime-store.cjs` | 原子版本记录、迁移、并发锁、历史选择 |
+| `server/runtime-update.cjs` | 官方包下载、校验、独立测试、切换及回退 |
+| `server/launch.cjs` / `auto-update.cjs` | 从生效记录启动服务，以及后台到期检查 |
 | `languages/` | UTS/UVUE 语言配置与 Tree-sitter 查询 |
 | `scripts/` | 构建、运行时准备、安装与统一检查 |
 | `test/integration.cjs` | 启动真实官方运行时的集成检查 |
+| `test/runtime-update.test.cjs` | 更新事务与失败分支测试；这里的空运行时夹具不代表语义测试 |
+| `test/update-lifecycle.cjs` | 真实 VSIX 安装、测试门槛、回退和管理启动入口演练 |
 | `test/fixtures/demo/` | 固定测试夹具，保留诊断用的类型错误 |
 | `examples/demo/` | 可以自由编辑的最小演示项目 |
 
@@ -62,17 +70,37 @@ rustfmt 和 `wasm32-wasip2` 目标；Cargo 依赖由 `Cargo.lock` 锁定。
 
 ## 升级 DCloud 运行时
 
-当前锁定 `dcloud-ide.hbuilderx-language-services 4.87.0`。不要只改下载 URL。
+首次安装使用 `server/runtime-policy.json` 中的 `4.87.0` 基线。
+常规官方稳定版由本机管理器自动发现，并通过真实测试后切换；每个候选的
+来源、哈希、测试报告和切换前后状态保存在独立目录。
+官方内部结构变化导致测试失败时，再进行人工适配：
 
 1. 从官方发布渠道取得新 VSIX，记录版本、SHA-256、来源与许可证。
 2. 检查 tsserver、dcloudio 插件、indexservice 入口和初始化配置是否变化。
 3. 检查 `dcloud-compat.cjs` 针对的 `sourceFile.js` 表达式及诊断行为。
-   若上游已修复，移除该内存替换；若仍需适配，保持明确的版本和匹配限制。
-4. 搜索旧版本号，核对 Rust 默认目录、服务端检查、安装/验证脚本、测试、
-   README 和第三方声明。历史验证记录保留原版本号，不作全局替换。
+   只有唯一匹配旧表达式时才替换；4.87.0 不匹配视为错误，新版不匹配时
+   原样运行，并必须通过 setup 诊断测试。不要对未知压缩代码做宽泛替换。
+4. 需要提升首次安装基线时，更新 `runtime-policy.json`、README 和第三方声明，
+   并复核 `initialState` 的迁移约束。历史验证记录保留原版本号，不作全局替换。
 5. 在独立的 `-ZedDataDirectory` 中准备运行时，完整运行集成检查，
    再在 Zed 中检查 UTS、普通 UVUE、script setup 的补全、跳转和类型检查。
 6. 按实际验证范围更新兼容性说明，并记录未覆盖的平台和能力。
+
+完整更新演练（不会改变日常使用的安装目录）：
+
+```powershell
+node test/update-lifecycle.cjs --runtime 'D:\tools\dcloud-4.87.0\extension' --work test-results
+```
+
+它重新验证同一个官方版本，演练切换到新目录、真实服务故障的拒绝、
+回退、暂停/恢复，以及回退后通过管理启动入口运行 26 项检查。
+可传 `--vsix` 复用已下载包；仍核对官方注册表的 SHA-256。
+不能把同版本演练写成已经验证了尚未发布的官方新版。
+
+`runtime-state.json` 是唯一生效记录；不要依赖旧 `runtime-path.txt`。
+发布新桥接版本时递增插件版本，以便嵌入的运行文件位于新的 `bridge-*`
+目录，不覆盖旧会话仍在使用的脚本。下载、解压、测试失败均不得切换 active；
+回退必须默认暂停自动更新。不要添加跳过校验或跳过测试的自动更新通道。
 
 运行时只在本地单独下载，不提交到仓库或复制进源码包。
 Tree-sitter/Vue 语法来源及 Zed Vue 预编译模块的校验值在
@@ -82,8 +110,7 @@ Tree-sitter/Vue 语法来源及 Zed Vue 预编译模块的校验值在
 ## CI 与版本
 
 `.github/workflows/ci.yml` 在 Windows + Node 24 下准备隔离运行时，
-执行同一个 `scripts/check.ps1` 并保存报告。
-只有仓库推送到启用 GitHub Actions 的远端后，工作流才会运行。
+执行同一个 `scripts/check.ps1`，然后演练真实更新/回退流程并保存报告。
 本地通过不代表远端 CI 已通过，也不代表做过新一轮 Zed 界面验收。
 
 版本号需同步更新 `extension.toml`、`Cargo.toml`、`package.json`，

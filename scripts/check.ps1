@@ -20,7 +20,7 @@ try {
     }
 
     Write-Host 'Checking PowerShell syntax...'
-    foreach ($file in Get-ChildItem -LiteralPath 'scripts' -Filter '*.ps1' -File) {
+    foreach ($file in Get-ChildItem -LiteralPath 'scripts', 'server' -Filter '*.ps1' -File) {
         $parseTokens = $null
         $parseErrors = $null
         [System.Management.Automation.Language.Parser]::ParseFile(
@@ -47,20 +47,26 @@ try {
         Write-Host 'Static checks passed. Build and real-runtime integration checks were not run.'
         return
     }
+    Write-Host 'Checking update transactions, failure isolation, and rollback...'
+    & $NodeCommand --test (Join-Path $sourceRoot 'test\runtime-update.test.cjs')
+    if ($LASTEXITCODE -ne 0) { throw 'Runtime update tests failed.' }
 
     if (-not $RuntimePath -and $env:LOCALAPPDATA) {
+        $statePath = Join-Path $env:LOCALAPPDATA 'Zed\extensions\work\uniapp-x\runtime-state.json'
         $pointer = Join-Path $env:LOCALAPPDATA 'Zed\extensions\work\uniapp-x\runtime-path.txt'
-        if (Test-Path -LiteralPath $pointer) {
+        if (Test-Path -LiteralPath $statePath) {
+            $RuntimePath = (Get-Content -LiteralPath $statePath -Raw | ConvertFrom-Json).active.path
+        } elseif (Test-Path -LiteralPath $pointer) {
             $RuntimePath = (Get-Content -LiteralPath $pointer -Raw).Trim()
         }
     }
     if (-not $RuntimePath) {
-        throw 'Run scripts/setup.ps1 first, or pass -RuntimePath <DCloud 4.87.0 extension directory>.'
+        throw 'Run scripts/setup.ps1 first, or pass -RuntimePath <official DCloud extension directory>.'
     }
     $RuntimePath = (Resolve-Path -LiteralPath $RuntimePath).Path
     $runtimeManifest = Get-Content -LiteralPath (Join-Path $RuntimePath 'package.json') -Raw | ConvertFrom-Json
-    if ($runtimeManifest.name -ne 'hbuilderx-language-services' -or $runtimeManifest.version -ne '4.87.0') {
-        throw 'Integration checks require the official DCloud 4.87.0 runtime.'
+    if ($runtimeManifest.name -ne 'hbuilderx-language-services' -or $runtimeManifest.publisher -ne 'dcloud-ide') {
+        throw 'Integration checks require the official DCloud runtime.'
     }
 
     Write-Host 'Building the extension...'
