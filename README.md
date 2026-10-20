@@ -1,12 +1,18 @@
-# uni-app x · Zed 本地插件原型
+# uni-app x for Zed
 
 为 `.uts` 和 `.uvue` 接入 DCloud 官方本地语言服务，提供代码补全、
 补全文档、跳转定义、悬停类型和类型错误诊断。
-这是独立原型，尚未发布到 Zed 扩展市场。
+这是独立维护的 Zed 插件项目，目前版本为 **0.1.0 原型**，
+尚未发布到 Zed 扩展市场。
+
+维护入口：[开发说明](CONTRIBUTING.md) · [路线图](ROADMAP.md) ·
+[变更记录](CHANGELOG.md)。本地 Git 的 `v0.1.0` 标签保存项目基线。
 
 2026-10-20：已在 Windows 的 Zed 1.24.3 中安装并验证 UTS、UVUE
 `<script setup>` 的补全菜单、跨文件 F12 跳转和未保存修改后的类型错误更新。
 26 项协议集成检查全部通过；详细范围见 `VALIDATION.md` 和 `verification.json`。
+本次项目化后的构建与复跑记录见
+[维护验证记录](docs/validation/2026-10-20-project.md)。
 
 ## 原理
 
@@ -25,6 +31,7 @@ Zed 可能自行下载 Node.js。
 ## Windows 安装
 
 发布目录已包含编译好的 `extension.wasm` 和 Vue 语法模块；UTS 使用 Zed 内置语法。
+若从 Git 检出源码，请先按下方“修改与构建”执行构建，再安装。
 在本目录打开 PowerShell：
 
 ```powershell
@@ -54,8 +61,8 @@ Zed 可能自行下载 Node.js。
 
 1. 在 `uni.` 后触发补全，可以看到官方 API，例如 `request`。
 2. 在 `greet("Zed")` 中的 `greet` 上按 F12，应跳到 `utils/greet.uts`。
-3. `const count: number = "wrong"` 故意保留了类型错误。
-   将 `"wrong"` 改为 `42`，无需保存就会更新诊断。
+3. 将 `const count` 的赋值改为 `number = "wrong"`，应显示类型错误。
+   再将 `"wrong"` 改为 `42`，无需保存就会更新诊断。
 4. 在 `uni.request` 的 `request` 上跳转，会打开官方 `.d.ts` 定义。
 
 若 Ctrl+Space 被输入法拦截，可在命令面板执行
@@ -89,6 +96,15 @@ Zed 可能自行下载 Node.js。
 
 测试直接启动这里的 LSP 桥接，并调用真正的 DCloud 服务，没有模拟补全或诊断。
 
+日常开发使用统一入口；它会检查脚本语法、版本一致性与 Rust 格式，
+构建 WASM，然后运行全部集成检查：
+
+```powershell
+.\scripts\check.ps1
+```
+
+也可以单独运行集成检查：
+
 ```powershell
 node .\test\integration.cjs `
   --runtime "$env:LOCALAPPDATA\Zed\extensions\work\uniapp-x\dcloud-4.87.0\extension" `
@@ -98,7 +114,8 @@ node .\test\integration.cjs `
 覆盖 UTS、普通 UVUE 和 `<script setup lang="uts">` 的 API 补全、
 补全详情、跨文件跳转、官方 API 跳转、悬停、类型诊断、未保存修改；
 另有启动期间快速更新、CRLF、emoji/UTF-16 列位置和增量编辑测试。
-测试会复制示例到独立目录，不改动演示源文件。
+测试从 `test/fixtures/demo` 复制固定样例到独立目录；
+可以自由修改 `examples/demo` 试用插件，不会影响回归检查。
 
 ## 已知边界
 
@@ -139,3 +156,13 @@ rustup target add wasm32-wasip2
 第三方组件及兼容改动见 `THIRD_PARTY_NOTICES.md`。
 官方文档：[DCloud 语言服务插件](https://doc.dcloud.net.cn/uni-app-x/tutorial/ls-plugin.html)、
 [Zed 语言扩展](https://zed.dev/docs/extensions/languages)。
+
+## 与 Vue 扩展的关系
+
+Zed 的普通 `.vue` 支持通过 [官方 Vue 扩展](https://github.com/zed-extensions/vue)
+提供，作者为 Zed Industries，语言服务来自 Vue language-tools（Volar）。
+使用普通 Vue 项目时，在 Zed 扩展页搜索并安装 **Vue** 即可；
+项目需有 TypeScript SDK，具体配置见 [Zed Vue 文档](https://zed.dev/docs/languages/vue)。
+
+本项目注册 `.uvue` 和 `.uts`，复用 DCloud 的 uni-app x 语义与平台类型。
+普通 Vue 扩展不能替代这里的 DCloud 语言服务。两者的同时安装验证列在路线图中。

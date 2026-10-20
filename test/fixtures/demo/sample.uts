@@ -1,0 +1,15 @@
+import { greet } from "./utils/greet.uts"
+
+// 对 greet 按 F12，跳到 utils/greet.uts。
+const greeting = greet("Zed")
+
+// 故意保留一个类型错误：把字符串改为 42，红线应消失。
+const count: number = "wrong"
+
+// 在 uni. 后按 Ctrl+Space，查看官方 API 补全。
+uni.request({
+  url: "https://example.com",
+  success: (result) => {
+    console.log(greeting, count, result.statusCode)
+  }
+})

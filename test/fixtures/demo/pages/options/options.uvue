@@ -1,0 +1,19 @@
+<template>
+  <view><text>{{ title }}</text></view>
+</template>
+
+<script lang="uts">
+import { greet } from "../../utils/greet.uts"
+
+// 普通 script 也应显示这处类型错误。
+const count: number = "wrong"
+
+export default {
+  data() {
+    return { title: greet("Zed"), count }
+  },
+  onLoad() {
+    uni.request({ url: "https://example.com" })
+  }
+}
+</script>

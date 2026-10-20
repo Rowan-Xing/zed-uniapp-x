@@ -1,0 +1,49 @@
+name: Verify extension
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: verify-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  windows:
+    runs-on: windows-2022
+    timeout-minutes: 20
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - name: Prepare Rust
+        run: |
+          rustup toolchain install stable --profile minimal --component rustfmt --target wasm32-wasip2
+          if ($LASTEXITCODE -ne 0) { throw 'Rust toolchain setup failed.' }
+      - name: Download verified DCloud runtime into an isolated directory
+        run: |
+          .\scripts\setup.ps1 -ZedDataDirectory (Join-Path $env:RUNNER_TEMP 'uniapp-x-zed')
+      - name: Check syntax, build WASM, and run real language-service tests
+        run: |
+          $pointer = Join-Path $env:RUNNER_TEMP 'uniapp-x-zed\extensions\work\uniapp-x\runtime-path.txt'
+          .\scripts\check.ps1 -RuntimePath (Get-Content -LiteralPath $pointer -Raw).Trim()
+      - name: Save test reports
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: integration-reports
+          path: test-results/**/report.json
+          if-no-files-found: warn
+          retention-days: 14

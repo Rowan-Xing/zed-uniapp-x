@@ -19,7 +19,10 @@ impl zed::Extension for UniAppX {
         for (name, source) in [
             ("server.cjs", include_str!("../server/server.cjs")),
             ("ts-client.cjs", include_str!("../server/ts-client.cjs")),
-            ("dcloud-compat.cjs", include_str!("../server/dcloud-compat.cjs")),
+            (
+                "dcloud-compat.cjs",
+                include_str!("../server/dcloud-compat.cjs"),
+            ),
         ] {
             fs::write(directory.join(name), source).map_err(|e| e.to_string())?;
         }

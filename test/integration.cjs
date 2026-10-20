@@ -16,8 +16,14 @@ assert.ok(runtime, 'Pass --runtime <DCloud 4.87.0 extension directory>');
 const work = path.resolve(argument('--work', '.cache/tests'));
 const session = path.join(work, `run-${Date.now()}`);
 const project = path.join(session, 'project');
+const fixtureFiles = ['sample.uts', 'pages/index/index.uvue', 'pages/options/options.uvue'];
 fs.mkdirSync(session, { recursive: true });
-fs.cpSync(path.join(__dirname, '../examples/demo'), project, { recursive: true });
+fs.cpSync(path.join(__dirname, 'fixtures/demo'), project, { recursive: true });
+for (const name of fixtureFiles) {
+  const text = fs.readFileSync(path.join(project, name), 'utf8');
+  assert.ok(text.includes('const count: number = "wrong"'),
+    `${name}: fixed test fixture must retain its intentional type error`);
+}
 const traceFile = path.join(session, 'bridge.jsonl');
 const stderrFile = path.join(session, 'stderr.log');
 const child = spawn(process.execPath, [
@@ -114,7 +120,7 @@ function record(name, detail = {}) {
   assert.ok(initialized.capabilities.completionProvider);
   notify('initialized', {});
   record('LSP initialize with official DCloud runtime', initialized.serverInfo);
-  for (const name of ['sample.uts', 'pages/index/index.uvue', 'pages/options/options.uvue']) {
+  for (const name of fixtureFiles) {
     const original = fs.readFileSync(path.join(project, name), 'utf8');
     const fileUri = uri(name);
     notify('textDocument/didOpen', { textDocument: {
