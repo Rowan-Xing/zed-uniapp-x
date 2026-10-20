@@ -5,8 +5,10 @@
 这是独立维护的 Zed 插件项目，目前版本为 **0.1.0 原型**，
 尚未发布到 Zed 扩展市场。
 
+源码仓库：[Rowan-Xing/zed-uniapp-x](https://github.com/Rowan-Xing/zed-uniapp-x)。
+
 维护入口：[开发说明](CONTRIBUTING.md) · [路线图](ROADMAP.md) ·
-[变更记录](CHANGELOG.md)。本地 Git 的 `v0.1.0` 标签保存项目基线。
+[变更记录](CHANGELOG.md)。`v0.1.0` 标签保存项目基线。
 
 2026-10-20：已在 Windows 的 Zed 1.24.3 中安装并验证 UTS、UVUE
 `<script setup>` 的补全菜单、跨文件 F12 跳转和未保存修改后的类型错误更新。
@@ -131,6 +133,13 @@ node .\test\integration.cjs `
 - Windows 是这次构建和验证的平台，安装脚本只支持 Windows。
 
 ## 修改与构建
+
+取得源码：
+
+```powershell
+git clone https://github.com/Rowan-Xing/zed-uniapp-x.git
+cd zed-uniapp-x
+```
 
 改动 `server/*.cjs` 后也要重新编译 Rust：
 这些文件通过 `include_str!` 嵌入 WASM，启动时写入扩展工作目录。

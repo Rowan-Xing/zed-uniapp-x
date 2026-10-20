@@ -4,6 +4,7 @@ version = "0.1.0"
 schema_version = 1
 authors = ["Local prototype"]
 description = "UTS and UVUE completion, definitions and diagnostics using DCloud's local language service."
+repository = "https://github.com/Rowan-Xing/zed-uniapp-x"
 languages = ["languages/uts", "languages/uvue"]
 
 [lib]
