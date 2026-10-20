@@ -1,0 +1,6 @@
+/target/
+/grammars/
+/extension.wasm
+/.runtime/
+/.cache/
+/test-results/

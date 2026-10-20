@@ -1,0 +1,20 @@
+id = "uniapp-x"
+name = "uni-app x (Local Prototype)"
+version = "0.1.0"
+schema_version = 1
+authors = ["Local prototype"]
+description = "UTS and UVUE completion, definitions and diagnostics using DCloud's local language service."
+languages = ["languages/uts", "languages/uvue"]
+
+[lib]
+kind = "Rust"
+version = "0.7.0"
+
+[language_servers.uniapp-x]
+name = "uni-app x"
+languages = ["UTS", "UVUE"]
+language_ids = { UTS = "uts", UVUE = "uvue" }
+
+[grammars.vue]
+repository = "https://github.com/tree-sitter-grammars/tree-sitter-vue"
+rev = "7e48557b903a9db9c38cea3b7839ef7e1f36c693"

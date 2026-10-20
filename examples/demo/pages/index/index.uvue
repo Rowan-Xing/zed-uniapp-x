@@ -1,0 +1,26 @@
+<template>
+  <view class="page">
+    <text>{{ title }}</text>
+    <text>{{ count }}</text>
+  </view>
+</template>
+
+<script setup lang="uts">
+import { greet } from "../../utils/greet.uts"
+
+const title = greet("Zed")
+
+// 故意的类型错误，用于验证诊断；改为 42 后应消失。
+const count: number = 42
+
+uni.request({
+  url: "https://example.com",
+  success: (result) => {
+    console.log(result.statusCode)
+  }
+})
+</script>
+
+<style>
+
+</style>

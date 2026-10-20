@@ -1,0 +1,227 @@
+{
+  "verifiedAt": "2026-10-20T18:48:57.8406705+08:00",
+  "pass": true,
+  "runtimeVersion": "4.87.0",
+  "zedVersion": "1.24.3",
+  "platform": "Windows x64 / APP-ANDROID",
+  "nodeVersions": [
+    "26.8.1",
+    "24.21.0"
+  ],
+  "checkCount": 26,
+  "tests": [
+    {
+      "detail": {
+        "name": "uni-app x (DCloud local bridge)",
+        "version": "0.1.0"
+      },
+      "name": "LSP initialize with official DCloud runtime",
+      "pass": true
+    },
+    {
+      "detail": {
+        "count": 203
+      },
+      "name": "sample.uts: uni API completion",
+      "pass": true
+    },
+    {
+      "detail": {
+        "detail": "(method) Uni.request<unknown>(param: RequestOptions<unknown>): RequestTask"
+      },
+      "name": "sample.uts: completion details",
+      "pass": true
+    },
+    {
+      "detail": {},
+      "name": "sample.uts: cross-file definition",
+      "pass": true
+    },
+    {
+      "detail": {},
+      "name": "sample.uts: hover",
+      "pass": true
+    },
+    {
+      "detail": {
+        "diagnostic": {
+          "range": {
+            "start": {
+              "line": 6,
+              "character": 6
+            },
+            "end": {
+              "line": 6,
+              "character": 11
+            }
+          },
+          "message": "Type 'string' is not assignable to type 'number'.\nAPP-ANDROID",
+          "severity": 1,
+          "code": 2322,
+          "source": "uni-app x"
+        }
+      },
+      "name": "sample.uts: official type diagnostic and source position",
+      "pass": true
+    },
+    {
+      "detail": {},
+      "name": "sample.uts: diagnostic clears after unsaved edit",
+      "pass": true
+    },
+    {
+      "detail": {},
+      "name": "sample.uts: official uni API definition",
+      "pass": true
+    },
+    {
+      "detail": {
+        "count": 203
+      },
+      "name": "pages/index/index.uvue: uni API completion",
+      "pass": true
+    },
+    {
+      "detail": {
+        "detail": "(method) Uni.request<unknown>(param: RequestOptions<unknown>): RequestTask"
+      },
+      "name": "pages/index/index.uvue: completion details",
+      "pass": true
+    },
+    {
+      "detail": {},
+      "name": "pages/index/index.uvue: cross-file definition",
+      "pass": true
+    },
+    {
+      "detail": {},
+      "name": "pages/index/index.uvue: hover",
+      "pass": true
+    },
+    {
+      "detail": {
+        "diagnostic": {
+          "range": {
+            "start": {
+              "line": 13,
+              "character": 6
+            },
+            "end": {
+              "line": 13,
+              "character": 11
+            }
+          },
+          "message": "Type 'string' is not assignable to type 'number'.\nAPP-ANDROID",
+          "severity": 1,
+          "code": 2322,
+          "source": "uni-app x"
+        }
+      },
+      "name": "pages/index/index.uvue: official type diagnostic and source position",
+      "pass": true
+    },
+    {
+      "detail": {},
+      "name": "pages/index/index.uvue: diagnostic clears after unsaved edit",
+      "pass": true
+    },
+    {
+      "detail": {},
+      "name": "pages/index/index.uvue: official uni API definition",
+      "pass": true
+    },
+    {
+      "detail": {
+        "count": 203
+      },
+      "name": "pages/options/options.uvue: uni API completion",
+      "pass": true
+    },
+    {
+      "detail": {
+        "detail": "(method) Uni.request<unknown>(param: RequestOptions<unknown>): RequestTask"
+      },
+      "name": "pages/options/options.uvue: completion details",
+      "pass": true
+    },
+    {
+      "detail": {},
+      "name": "pages/options/options.uvue: cross-file definition",
+      "pass": true
+    },
+    {
+      "detail": {},
+      "name": "pages/options/options.uvue: hover",
+      "pass": true
+    },
+    {
+      "detail": {
+        "diagnostic": {
+          "range": {
+            "start": {
+              "line": 8,
+              "character": 6
+            },
+            "end": {
+              "line": 8,
+              "character": 11
+            }
+          },
+          "message": "Type 'string' is not assignable to type 'number'.\nAPP-ANDROID",
+          "severity": 1,
+          "code": 2322,
+          "source": "uni-app x"
+        }
+      },
+      "name": "pages/options/options.uvue: official type diagnostic and source position",
+      "pass": true
+    },
+    {
+      "detail": {},
+      "name": "pages/options/options.uvue: diagnostic clears after unsaved edit",
+      "pass": true
+    },
+    {
+      "detail": {},
+      "name": "pages/options/options.uvue: official uni API definition",
+      "pass": true
+    },
+    {
+      "detail": {},
+      "name": "incremental range edit after emoji clears type error without full resync",
+      "pass": true
+    },
+    {
+      "detail": {},
+      "name": "rapid updates, CRLF and UTF-16 synchronize without stale diagnostics",
+      "pass": true
+    },
+    {
+      "detail": {},
+      "name": "UTF-16 diagnostic column after emoji",
+      "pass": true
+    },
+    {
+      "detail": {},
+      "name": "clean LSP shutdown",
+      "pass": true
+    }
+  ],
+  "gui": {
+    "utsCompletionMenu": true,
+    "utsCompletionInsertion": true,
+    "utsDefinition": true,
+    "utsDiagnosticUpdates": true,
+    "uvueSetupCompletionMenu": true,
+    "uvueSetupDefinition": true,
+    "uvueSetupDiagnosticUpdates": true,
+    "demoFilesRestored": true,
+    "notes": [
+      "Used editor: show completions from command palette.",
+      "Restarted the language service after reinstalling the prototype.",
+      "A CSS warning was visible; CSS validation is outside this acceptance test."
+    ]
+  },
+  "extensionSha256": "32201a1f96dd3746c21e0cb2a32c4cb856d496c74fb999ab27eb9a647d5c2f56",
+  "vueGrammarSha256": "d654acab62559507d310262b8254afaacba6243edecdfb12d578cfc531ee431b"
+}
