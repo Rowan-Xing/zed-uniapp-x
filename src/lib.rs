@@ -116,7 +116,7 @@ fn manager(
 }
 
 impl UniAppX {
-    fn bridge(&mut self, id: &zed::LanguageServerId, worktree: &zed::Worktree) -> Result<PathBuf> {
+    fn bridge(&mut self, id: &zed::LanguageServerId) -> Result<PathBuf> {
         if let Some(directory) = &self.bridge {
             return Ok(directory.clone());
         }
@@ -150,21 +150,11 @@ impl UniAppX {
                 .as_nanos();
             let staging = root.join(format!("bridge-staging-{timestamp}"));
             fs::create_dir_all(&staging).map_err(|e| e.to_string())?;
-            let tar = worktree.which("tar").ok_or(
-                "Windows tar.exe was not found on PATH. Restore the Windows system tools on PATH.",
-            )?;
-            let output = zed::process::Command::new(tar)
-                .args(["-xzf"])
-                .arg(archive.to_string_lossy())
-                .arg("-C")
-                .arg(staging.to_string_lossy())
-                .output()?;
-            if output.status != Some(0) {
-                return Err(format!(
-                    "Bridge extraction failed: {}",
-                    String::from_utf8_lossy(&output.stderr)
-                ));
-            }
+            let archive_file = fs::File::open(&archive).map_err(|e| e.to_string())?;
+            let decoder = flate2::read::GzDecoder::new(archive_file);
+            tar::Archive::new(decoder)
+                .unpack(&staging)
+                .map_err(|e| format!("Bridge extraction failed: {e}"))?;
             if !staging.join("server/installer.cjs").is_file()
                 || !staging.join("server/launch.cjs").is_file()
             {
@@ -275,14 +265,12 @@ impl zed::Extension for UniAppX {
             );
         }
         let cwd = env::current_dir().map_err(|e| e.to_string())?;
-        let directory = self
-            .bridge(language_server_id, worktree)
-            .inspect_err(|error| {
-                zed::set_language_server_installation_status(
-                    language_server_id,
-                    &Status::Failed(error.clone()),
-                );
-            })?;
+        let directory = self.bridge(language_server_id).inspect_err(|error| {
+            zed::set_language_server_installation_status(
+                language_server_id,
+                &Status::Failed(error.clone()),
+            );
+        })?;
         let node = zed::node_binary_path()?;
         let options = LspSettings::for_worktree("uniapp-x", worktree)
             .ok()

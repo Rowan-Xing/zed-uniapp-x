@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+## 0.3.1 — 2026-10-20
+
+- Fix runtime extraction in non-ASCII paths on Windows installations using a different system code page.
+- Extract the checksum-verified bridge directly in Rust.
+- Keep grammar source checkouts out of local installations.
+- Shorten both READMEs to installation and usage.
+
 ## 0.3.0 — 2026-10-20
 
 - First-launch installation through Zed's extension API, with a separately versioned bridge archive.

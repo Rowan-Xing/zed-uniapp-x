@@ -229,7 +229,7 @@ connection.onInitialize(async params => {
   await configure();
   trace('initialize', { root, runtime, dataRoot, version: runtimePackage.version, targets: settings.targets || 'platformConfig.json' });
   return {
-    serverInfo: { name: 'uni-app x (DCloud local bridge)', version: '0.3.0' },
+    serverInfo: { name: 'uni-app x (DCloud local bridge)', version: '0.3.1' },
     capabilities: {
       textDocumentSync: { openClose: true, change: lsp.TextDocumentSyncKind.Incremental, save: { includeText: false } },
       completionProvider: { triggerCharacters: ['.', '"', "'", '/', '<', ':', '@'], resolveProvider: true },

@@ -1,7 +1,7 @@
 # Development
 
 The Zed adapter and LSP bridge reuse DCloud's published local language services.
-Current release: 0.3.0. The repository license is MIT; runtime and grammar notices
+Current release: 0.3.1. The repository license is MIT; runtime and grammar notices
 are in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 
 ## Requirements
@@ -56,7 +56,7 @@ work directories. `examples/demo` is an editable sample and does not affect test
 node --test test/runtime-update.test.cjs test/installer.test.cjs
 node test/integration.cjs --runtime 'D:\tools\dcloud-4.87.0\extension' --work test-results
 node test/update-lifecycle.cjs --runtime 'D:\tools\dcloud-4.87.0\extension' --vsix 'D:\downloads\dcloud.vsix' --work test-results
-node test/fresh-install.cjs --bridge dist/uniapp-x-bridge-0.3.0.tar.gz --vsix 'D:\downloads\dcloud.vsix' --work test-results
+node test/fresh-install.cjs --bridge dist/uniapp-x-bridge-0.3.1.tar.gz --vsix 'D:\downloads\dcloud.vsix' --work test-results
 ```
 
 The first command tests transaction behavior using explicit test doubles.

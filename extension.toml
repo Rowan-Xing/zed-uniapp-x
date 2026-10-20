@@ -1,6 +1,6 @@
 id = "uniapp-x"
 name = "uni-app x"
-version = "0.3.0"
+version = "0.3.1"
 schema_version = 1
 authors = ["Rowan-Xing"]
 description = "A Zed port of DCloud's official uni-app x language services for UTS and UVUE."

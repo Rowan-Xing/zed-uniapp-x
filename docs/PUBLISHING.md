@@ -10,7 +10,7 @@ Provides completion, definitions, hover information, and type diagnostics using
 DCloud's published local runtime. The extension supplies the Zed adapter and
 protocol bridge, with verified runtime updates and rollback.
 
-## 0.3.0 submission preparation
+## 0.3.1 submission preparation
 
 - The repository is public and uses the MIT license.
 - The extension declares pinned Vue and TypeScript grammars.
@@ -38,7 +38,7 @@ protocol bridge, with verified runtime updates and rollback.
 ```toml
 [uniapp-x]
 submodule = "extensions/uniapp-x"
-version = "0.3.0"
+version = "0.3.1"
 ```
 
 Registry submission is not publication. Zed's maintainers review the PR; after

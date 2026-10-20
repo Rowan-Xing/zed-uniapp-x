@@ -28,9 +28,36 @@ try {
         if ($size -gt 4GB) { throw 'Expanded VSIX exceeds 4 GiB.' }
     }
 } finally { $zip.Dispose() }
-# Windows PowerShell's .NET Framework ZIP extractor fails on long dependency
-# paths. Windows' bundled bsdtar handles them without changing OS settings.
+# Use tar for long dependency paths. Older Windows tar builds cannot represent
+# Unicode command-line paths, so send the archive on stdin and set the working
+# directory through .NET's Unicode process API.
 New-Item -ItemType Directory -Path $resolvedDestination | Out-Null
 $tarCommand = Join-Path $env:SystemRoot 'System32\tar.exe'
-& $tarCommand -xf $Archive -C $resolvedDestination
-if ($LASTEXITCODE -ne 0) { throw "VSIX extraction failed with exit code $LASTEXITCODE." }
+$tarInfo = [System.Diagnostics.ProcessStartInfo]::new()
+$tarInfo.FileName = $tarCommand
+$tarInfo.Arguments = '-xf -'
+$tarInfo.WorkingDirectory = $resolvedDestination
+$tarInfo.UseShellExecute = $false
+$tarInfo.CreateNoWindow = $true
+$tarInfo.RedirectStandardInput = $true
+$tarInfo.RedirectStandardOutput = $true
+$tarInfo.RedirectStandardError = $true
+$tarProcess = [System.Diagnostics.Process]::new()
+$tarProcess.StartInfo = $tarInfo
+$archiveStream = [System.IO.File]::OpenRead($Archive)
+try {
+    if (-not $tarProcess.Start()) { throw 'Could not start Windows tar.exe.' }
+    $stdout = $tarProcess.StandardOutput.ReadToEndAsync()
+    $stderr = $tarProcess.StandardError.ReadToEndAsync()
+    $archiveStream.CopyTo($tarProcess.StandardInput.BaseStream)
+    $tarProcess.StandardInput.Close()
+    $tarProcess.WaitForExit()
+    [Console]::Out.Write($stdout.Result)
+    [Console]::Error.Write($stderr.Result)
+    if ($tarProcess.ExitCode -ne 0) {
+        throw "VSIX extraction failed with exit code $($tarProcess.ExitCode)."
+    }
+} finally {
+    $archiveStream.Dispose()
+    $tarProcess.Dispose()
+}

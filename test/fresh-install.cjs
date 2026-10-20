@@ -11,6 +11,7 @@ const root = path.resolve(arg('--work'), `fresh-${randomUUID()}`);
 const archive = path.resolve(arg('--bridge'));
 const vsix = path.resolve(arg('--vsix'));
 const metadata = require('../bridge-release.json');
+const stateDirectory = path.join(root, '状态 🧪 with spaces');
 
 (async () => {
   fs.mkdirSync(root, { recursive: true });
@@ -22,7 +23,6 @@ const metadata = require('../bridge-release.json');
   const installer = require(path.join(bridge, 'server/installer.cjs'));
   const store = require(path.join(bridge, 'server/runtime-store.cjs'));
   const { verifyRuntime } = require(path.join(bridge, 'server/runtime-update.cjs'));
-  const stateDirectory = path.join(root, '状态 with spaces');
   fs.mkdirSync(stateDirectory);
   const prepared = installer.prepare(stateDirectory);
   assert.equal(prepared.hasActive, false);
@@ -46,7 +46,7 @@ const metadata = require('../bridge-release.json');
   console.log(`PASS packaged fresh installation\nREPORT ${path.join(root, 'report.json')}`);
 })().catch(error => {
   console.error(error);
-  const sessions = path.join(root, '状态 with spaces', 'runtime-releases');
+  const sessions = path.join(stateDirectory, 'runtime-releases');
   if (fs.existsSync(sessions)) {
     for (const session of fs.readdirSync(sessions)) {
       const log = path.join(sessions, session, 'extract.log');
