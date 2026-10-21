@@ -124,7 +124,10 @@ function record(name, detail = {}) {
   assert.ok(initialized.capabilities.completionProvider);
   const expectedData = stateDirectory
     ? path.join(stateDirectory, 'service-data') : path.join(path.dirname(runtime), 'data');
-  assert.ok(fs.statSync(path.join(expectedData, 'HBuilder X')).isDirectory(), 'index cache must stay with the managed runtime');
+  const indexCache = process.platform === 'darwin'
+    ? path.join(expectedData, 'Library', 'Application Support', 'HBuilder X')
+    : path.join(expectedData, 'HBuilder X');
+  assert.ok(fs.statSync(indexCache).isDirectory(), 'index cache must stay with the managed runtime');
   const initializationTrace = fs.readFileSync(traceFile, 'utf8').trim().split('\n')
     .map(line => JSON.parse(line)).find(entry => entry.event === 'initialize');
   assert.equal(path.resolve(initializationTrace.dataRoot), path.resolve(expectedData));

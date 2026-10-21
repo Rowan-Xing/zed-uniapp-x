@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 0.4.0 — 2026-10-21
+
+- Add macOS startup and cache paths, with Apple Silicon CI and an on-device validation guide.
+- Extract official VSIX archives in Node on both hosts; bundle the locked ZIP reader and its licenses.
+- Check archive paths, size limits, Unicode collisions, and links before extraction.
+- Preserve path case on macOS and keep Windows path matching unchanged.
+- Add a portable real-runtime test command covering fresh installation, updates, and rollback.
+
 ## 0.3.1 — 2026-10-20
 
 - Fix runtime extraction in non-ASCII paths on Windows installations using a different system code page.

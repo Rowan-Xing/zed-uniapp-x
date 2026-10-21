@@ -32,6 +32,16 @@ The known expression must match exactly once for 4.87.0. Future versions with a
 different getter run without the patch and must pass the same setup diagnostics
 tests before activation.
 
+## ZIP extraction
+
+The bridge bundles the pure-JavaScript ZIP reader `yauzl` 3.4.0 and its dependency
+`pend` 1.2.0, both MIT. Exact distributions and integrity hashes are locked in
+`package-lock.json`. Their original `LICENSE` files are included under
+`node_modules/yauzl` and `node_modules/pend` in the bridge archive.
+
+- https://github.com/thejoshwolfe/yauzl
+- https://github.com/andrewrk/node-pend
+
 ## Tree-sitter TypeScript
 
 - https://github.com/tree-sitter/tree-sitter-typescript

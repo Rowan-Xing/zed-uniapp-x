@@ -13,13 +13,30 @@ parser.add_argument("--check", action="store_true", help="Verify committed relea
 args = parser.parse_args()
 version = json.loads((ROOT / "package.json").read_text(encoding="utf-8"))["version"]
 files = [
-    "LICENSE", "THIRD_PARTY_NOTICES.md", "package.json", "test/integration.cjs",
+    "LICENSE", "THIRD_PARTY_NOTICES.md", "package.json", "package-lock.json", "test/integration.cjs",
     *[f"server/{name}" for name in (
         "server.cjs", "ts-client.cjs", "dcloud-compat.cjs", "launch.cjs", "auto-update.cjs",
-        "runtime-store.cjs", "runtime-update.cjs", "runtime-policy.json", "extract-runtime.ps1", "installer.cjs",
+        "runtime-store.cjs", "runtime-update.cjs", "runtime-policy.json", "extract-runtime.cjs", "installer.cjs",
     )],
     *[p.relative_to(ROOT).as_posix() for p in (ROOT / "test/fixtures/demo").rglob("*") if p.is_file()],
 ]
+# Bundle the locked, pure-JavaScript ZIP reader. End users need neither npm nor
+# platform-specific extraction tools. Explicit files keep test/build debris out.
+dependency_files = {
+    "yauzl": ["package.json", "LICENSE", "index.js", "fd-slicer.js", "crc32.js"],
+    "pend": ["package.json", "LICENSE", "index.js"],
+}
+lock = json.loads((ROOT / "package-lock.json").read_text(encoding="utf-8"))
+if set(lock["packages"]) != {"", *[f"node_modules/{name}" for name in dependency_files]}:
+    raise ValueError("Update the bridge dependency file list to match package-lock.json")
+for name, names in dependency_files.items():
+    base = f"node_modules/{name}"
+    manifest = ROOT / base / "package.json"
+    if not manifest.exists():
+        raise SystemExit("Run npm ci --ignore-scripts before packaging the bridge.")
+    if json.loads(manifest.read_text(encoding="utf-8"))["version"] != lock["packages"][base]["version"]:
+        raise ValueError(f"Installed {name} differs from package-lock.json")
+    files.extend(f"{base}/{name}" for name in names)
 tar_bytes = io.BytesIO()
 with tarfile.open(fileobj=tar_bytes, mode="w", format=tarfile.USTAR_FORMAT) as archive:
     for name in sorted(files):

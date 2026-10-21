@@ -10,7 +10,7 @@ Provides completion, definitions, hover information, and type diagnostics using
 DCloud's published local runtime. The extension supplies the Zed adapter and
 protocol bridge, with verified runtime updates and rollback.
 
-## 0.3.1 submission preparation
+## 0.4.0 submission preparation
 
 - The repository is public and uses the MIT license.
 - The extension declares pinned Vue and TypeScript grammars.
@@ -20,11 +20,13 @@ protocol bridge, with verified runtime updates and rollback.
   installer checks the official VSIX and runs 26 real checks before activation.
 - Existing runtime state, update pauses, and rollback history are preserved.
 - The primary README, extension messages, and settings documentation are English.
-- The supported host is Windows. Other hosts return an explicit message.
+- Windows is supported; Apple Silicon macOS has a dedicated CI job and still
+  needs the editor checks in `docs/MACOS-VALIDATION.md` before publication.
 
 ## Release and submission
 
-1. Build the deterministic bridge with `python scripts/package_bridge.py`.
+1. Run `npm ci --ignore-scripts`, then build the deterministic bridge with
+   `python scripts/package_bridge.py`.
 2. Run the full check script, real update lifecycle, and packaged fresh-install
    test. Run the same checks in GitHub CI and verify the final code in Zed.
 3. Publish the bridge archive and checksum at the URL in `bridge-release.json`.
@@ -38,7 +40,7 @@ protocol bridge, with verified runtime updates and rollback.
 ```toml
 [uniapp-x]
 submodule = "extensions/uniapp-x"
-version = "0.3.1"
+version = "0.4.0"
 ```
 
 Registry submission is not publication. Zed's maintainers review the PR; after

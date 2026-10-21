@@ -48,7 +48,8 @@ if (-not $RuntimePath) {
             throw "DCloud VSIX checksum mismatch: $VsixPath"
         }
         Write-Host "Extracting the verified runtime to $runtimeContainer..."
-        & (Join-Path $sourceRoot 'server\extract-runtime.ps1') -Archive $VsixPath -Destination $runtimeContainer
+        & $NodeCommand (Join-Path $sourceRoot 'server\extract-runtime.cjs') $VsixPath $runtimeContainer
+        if ($LASTEXITCODE -ne 0) { throw 'Runtime extraction failed.' }
     }
 }
 $RuntimePath = (Resolve-Path -LiteralPath $RuntimePath).Path

@@ -16,7 +16,10 @@ const stateArg = process.argv.indexOf('--state-dir');
 const dataRoot = stateArg >= 0
   ? path.join(process.argv[stateArg + 1], 'service-data')
   : path.join(path.dirname(runtime), 'data');
-fs.mkdirSync(path.join(dataRoot, 'HBuilder X'), { recursive: true });
+const indexDataRoot = process.platform === 'darwin'
+  ? path.join(dataRoot, 'Library', 'Application Support', 'HBuilder X')
+  : path.join(dataRoot, 'HBuilder X');
+fs.mkdirSync(indexDataRoot, { recursive: true });
 // DCloud's indexer uses APPDATA/HOME rather than the tsserver data-dir flag.
 // Scope these variables to its child processes so caches stay with the extension.
 const runtimeEnvironment = {
@@ -44,7 +47,10 @@ const dirty = new Set();
 const queuedVersions = new Map();
 const appliedTargets = new Set();
 const tracePath = process.env.UNIAPP_X_TRACE;
-const normalize = file => path.resolve(file).replaceAll('\\', '/').toLowerCase();
+const normalize = file => {
+  const resolved = path.resolve(file).replaceAll('\\', '/');
+  return process.platform === 'win32' ? resolved.toLowerCase() : resolved;
+};
 const toUri = file => pathToFileURL(path.resolve(file)).href;
 const toFile = uri => fileURLToPath(uri);
 const trace = (event, data = {}) => {
@@ -229,7 +235,7 @@ connection.onInitialize(async params => {
   await configure();
   trace('initialize', { root, runtime, dataRoot, version: runtimePackage.version, targets: settings.targets || 'platformConfig.json' });
   return {
-    serverInfo: { name: 'uni-app x (DCloud local bridge)', version: '0.3.1' },
+    serverInfo: { name: 'uni-app x (DCloud local bridge)', version: require('../package.json').version },
     capabilities: {
       textDocumentSync: { openClose: true, change: lsp.TextDocumentSyncKind.Incremental, save: { includeText: false } },
       completionProvider: { triggerCharacters: ['.', '"', "'", '/', '<', ':', '@'], resolveProvider: true },

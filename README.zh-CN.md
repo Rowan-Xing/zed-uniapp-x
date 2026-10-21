@@ -8,7 +8,8 @@ DCloud 官方 uni-app x 语言服务的 Zed 适配移植版。
 
 ## 安装
 
-支持 **Windows**。从源码安装前，先安装 [Rust](https://rustup.rs/)，再克隆仓库：
+支持 **Windows**，Apple 芯片 Mac 可按[验证说明](docs/MACOS-VALIDATION.md)试用。
+从源码安装前，先安装 [Rust](https://rustup.rs/)，再克隆仓库：
 
 ```sh
 git clone https://github.com/Rowan-Xing/zed-uniapp-x.git

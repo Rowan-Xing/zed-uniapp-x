@@ -17,6 +17,8 @@
   dependency license files and attribution.
 - Executable changes require scripts/check.ps1. Installation changes additionally
   require test/fresh-install.cjs and test/update-lifecycle.cjs with the official VSIX.
+  On macOS use scripts/check-macos.sh, which builds WASM and runs those real-runtime
+  checks. The unchanged grammars are compiled by Zed during dev-extension installation.
 - GUI checks establish editor behavior after startup, language, or grammar
   changes. Prefer CLI/protocol checks and keep GUI use minimal; stop when asked.
   Report unverified scope honestly.

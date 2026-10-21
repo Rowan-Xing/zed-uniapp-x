@@ -32,6 +32,17 @@ Restart the language server after a manual update or rollback. Reinstalling the
 extension preserves the selected runtime, history, and pause setting.
 Old packages are not automatically deleted.
 
+On macOS, use the Node entry point with Zed's extension work directory (adjust
+the path if using a custom data directory):
+
+```sh
+state="$HOME/Library/Application Support/Zed/extensions/work/uniapp-x"
+node server/runtime-update.cjs status --state-dir "$state"
+node server/runtime-update.cjs check --state-dir "$state"
+node server/runtime-update.cjs rollback --state-dir "$state"
+node server/runtime-update.cjs resume --state-dir "$state"
+```
+
 ## Settings
 
 The project target defaults to `platformConfig.json`. The verified sample target
@@ -63,8 +74,9 @@ Restart the language server after changing runtime or target settings.
 
 ## Scope
 
-- Windows is the supported host for this release. macOS and Linux startup returns
-  a clear unsupported-platform message; those hosts have not been validated.
+- Windows is supported. macOS Apple Silicon is available for
+  [on-device validation](MACOS-VALIDATION.md); Intel Mac is untested. Linux startup
+  returns an unsupported-platform message.
 - Android fixtures cover UTS, ordinary UVUE scripts, and script setup. They do not
   establish full support for iOS, Web, HarmonyOS, or large projects.
 - Highlighting uses pinned TypeScript and Vue Tree-sitter grammars; UTS-specific

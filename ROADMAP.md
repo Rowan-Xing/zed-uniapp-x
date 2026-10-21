@@ -24,7 +24,7 @@ The project reuses DCloud's local semantics to support uni-app x editing in Zed.
 - Full coexistence testing with the Vue extension.
 - Template attributes/events, CSS, platform-native types, and refactoring.
 - iOS, Web, and HarmonyOS target coverage.
-- macOS/Linux installation and runtime validation before claiming host support.
+- macOS Apple Silicon editor validation; then Intel Mac and Linux host coverage.
 - UTS-specific grammar coverage and large-project performance measurements.
 
 Build, run, packaging, and device debugging require separate integrations.

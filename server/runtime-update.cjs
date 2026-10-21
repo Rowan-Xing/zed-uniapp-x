@@ -5,6 +5,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { createHash, randomUUID } = require('node:crypto');
 const { spawn } = require('node:child_process');
+const { extractRuntime } = require('./extract-runtime.cjs');
 const {
   policy, versionParts, compareVersions, validateRuntime, loadState, saveState,
   initialState, acquireLock, activate,
@@ -69,7 +70,8 @@ async function fileHash(file) {
 function bridgeFingerprint() {
   const hash = createHash('sha256');
   for (const file of ['server.cjs', 'ts-client.cjs', 'dcloud-compat.cjs', 'runtime-store.cjs',
-    'runtime-policy.json', 'runtime-update.cjs', 'installer.cjs', 'extract-runtime.ps1', '../test/integration.cjs']) {
+    'runtime-policy.json', 'runtime-update.cjs', 'installer.cjs', 'extract-runtime.cjs',
+    '../package-lock.json', '../test/integration.cjs']) {
     hash.update(fs.readFileSync(path.join(__dirname, file)));
   }
   const visit = directory => {
@@ -106,7 +108,7 @@ function run(command, args, { log, signal, timeout = 5 * 60_000 } = {}) {
 }
 
 async function stageRelease(release, session, { vsix, signal } = {}) {
-  if (process.platform !== 'win32') throw new Error('Automatic runtime installation currently supports Windows only.');
+  if (!['win32', 'darwin'].includes(process.platform)) throw new Error('Automatic runtime installation supports Windows and macOS.');
   const archive = path.join(session, 'official.vsix');
   if (vsix) fs.copyFileSync(path.resolve(vsix), archive, fs.constants.COPYFILE_EXCL);
   else {
@@ -124,10 +126,7 @@ async function stageRelease(release, session, { vsix, signal } = {}) {
   }
   if (await fileHash(archive) !== release.sha256) throw new Error('Official VSIX SHA-256 mismatch; active runtime was kept.');
   const destination = path.join(session, 'package');
-  const powershell = path.join(process.env.SystemRoot || 'C:\\Windows', 'System32/WindowsPowerShell/v1.0/powershell.exe');
-  await run(powershell, ['-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass',
-    '-File', path.join(__dirname, 'extract-runtime.ps1'), '-Archive', archive, '-Destination', destination],
-  { log: path.join(session, 'extract.log'), signal });
+  await extractRuntime(archive, destination, { signal });
   const runtime = path.join(destination, 'extension');
   validateRuntime(runtime, release.version);
   return runtime;

@@ -1,17 +1,20 @@
 # Development
 
 The Zed adapter and LSP bridge reuse DCloud's published local language services.
-Current release: 0.3.1. The repository license is MIT; runtime and grammar notices
+Current version: 0.4.0. The repository license is MIT; runtime and grammar notices
 are in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 
 ## Requirements
 
-Windows, Node.js 22+ (CI uses 24), Python 3, Git, Rust/rustup, and Windows tar.
+Windows or macOS, Node.js 24, Python 3, Git, Rust/rustup, and tar.
 `rust-toolchain.toml` selects stable Rust, rustfmt, and `wasm32-wasip2`.
-There are no npm dependencies. Keep downloaded runtimes and generated artifacts
-out of Git.
+Install the locked bridge dependencies with `npm ci --ignore-scripts`.
+Keep downloaded runtimes, node_modules, and generated artifacts out of Git.
+On macOS, run `bash scripts/check-macos.sh`; see [Mac validation](docs/MACOS-VALIDATION.md).
+On Windows:
 
 ```powershell
+npm ci --ignore-scripts
 python scripts/package_bridge.py --check
 .\scripts\setup.ps1
 .\scripts\check.ps1
@@ -53,10 +56,10 @@ Do not replace an already-published release asset; bump the version instead.
 work directories. `examples/demo` is an editable sample and does not affect tests.
 
 ```powershell
-node --test test/runtime-update.test.cjs test/installer.test.cjs
+node --test test/runtime-update.test.cjs test/installer.test.cjs test/extract-runtime.test.cjs
 node test/integration.cjs --runtime 'D:\tools\dcloud-4.87.0\extension' --work test-results
 node test/update-lifecycle.cjs --runtime 'D:\tools\dcloud-4.87.0\extension' --vsix 'D:\downloads\dcloud.vsix' --work test-results
-node test/fresh-install.cjs --bridge dist/uniapp-x-bridge-0.3.1.tar.gz --vsix 'D:\downloads\dcloud.vsix' --work test-results
+node test/fresh-install.cjs --bridge dist/uniapp-x-bridge-0.4.0.tar.gz --vsix 'D:\downloads\dcloud.vsix' --work test-results
 ```
 
 The first command tests transaction behavior using explicit test doubles.
@@ -90,7 +93,7 @@ when upgrading the extension.
 ## Release checks
 
 Update `extension.toml`, `Cargo.toml`, `Cargo.lock`, `package.json`, and serverInfo.
-Repackage the bridge, build from a clean checkout, run Windows CI, and verify the
+Repackage the bridge, build from a clean checkout, run Windows and macOS CI, and verify the
 submitted code in Zed. Publish the bridge asset, then submit the registry pointer.
 The registry's submodule commit must be on a branch and its version must match.
 See [Publishing](docs/PUBLISHING.md).

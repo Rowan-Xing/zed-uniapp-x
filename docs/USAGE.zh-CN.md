@@ -25,6 +25,16 @@
 手动更新或回退后重启语言服务。覆盖安装保留版本选择、历史和暂停状态。
 旧包与失败记录不会自动清理。
 
+macOS 使用 Node 命令，指定 Zed 的扩展工作目录（自定义数据目录需相应调整）：
+
+```sh
+state="$HOME/Library/Application Support/Zed/extensions/work/uniapp-x"
+node server/runtime-update.cjs status --state-dir "$state"
+node server/runtime-update.cjs check --state-dir "$state"
+node server/runtime-update.cjs rollback --state-dir "$state"
+node server/runtime-update.cjs resume --state-dir "$state"
+```
+
 ## 配置与范围
 
 项目 `.zed/settings.json`：
@@ -47,7 +57,8 @@
 `autoUpdate: false` 可关闭当前工作区自动检查；首次安装仍会完成。
 `diagnostics: false` 可关闭类型诊断。修改运行时或目标平台后重启语言服务。
 
-本次支持 Windows，macOS/Linux 会显示明确提示。真实测试主要覆盖 Android
+支持 Windows，Apple 芯片 Mac 可按[验证说明](MACOS-VALIDATION.md)试用；
+Intel Mac 尚未测试，Linux 暂不支持。真实测试主要覆盖 Android
 样例中的补全、跳转、悬停、诊断和未保存修改；其他目标平台、大项目、模板/CSS、
 原生类型和重构尚未完整验收，不包含 HBuilderX 的编译、运行和真机调试。
 

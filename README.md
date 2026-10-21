@@ -8,7 +8,8 @@ and `.uvue`, including `<script setup lang="uts">`. Code analysis runs locally.
 
 ## Install
 
-Supports **Windows**. To install from source, install [Rust](https://rustup.rs/)
+Supports **Windows**; macOS Apple Silicon is available for
+[validation](docs/MACOS-VALIDATION.md). To install from source, install [Rust](https://rustup.rs/)
 and clone this repository:
 
 ```sh

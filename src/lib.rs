@@ -258,10 +258,9 @@ impl zed::Extension for UniAppX {
         language_server_id: &zed::LanguageServerId,
         worktree: &zed::Worktree,
     ) -> Result<zed::Command> {
-        if zed::current_platform().0 != zed::Os::Windows {
+        if !matches!(zed::current_platform().0, zed::Os::Windows | zed::Os::Mac) {
             return Err(
-                "uni-app x currently supports Windows. macOS and Linux have not been validated."
-                    .into(),
+                "uni-app x supports Windows and macOS. Linux has not been validated.".into(),
             );
         }
         let cwd = env::current_dir().map_err(|e| e.to_string())?;

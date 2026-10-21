@@ -90,7 +90,7 @@ function initialState(root, runtime) {
   // Only the historically validated bootstrap may be imported without a test
   // receipt. New versions must enter through the updater's regression gate.
   if (manifest.version !== policy.bootstrapVersion) {
-    throw new Error(`Initial managed runtime must be ${policy.bootstrapVersion}; use setup.ps1 first.`);
+    throw new Error(`Initial managed runtime must be ${policy.bootstrapVersion}; install the pinned bootstrap first.`);
   }
   return {
     schema: 1,

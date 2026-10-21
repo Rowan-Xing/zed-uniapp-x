@@ -175,7 +175,7 @@ async function main() {
   const value = name => args[args.indexOf(name) + 1];
   const root = value('--state-dir');
   if (!args.includes('--state-dir') || !path.isAbsolute(root || '')) throw new Error('An absolute extension work directory is required.');
-  if (process.platform !== 'win32') throw new Error('uni-app x currently supports Windows. macOS and Linux have not been validated.');
+  if (!['win32', 'darwin'].includes(process.platform)) throw new Error('uni-app x supports Windows and macOS. Linux has not been validated.');
   let result;
   if (action === 'prepare') result = prepare(root, !args.includes('--no-auto'));
   else if (action === 'plan') result = plan(root, JSON.parse(value('--release')));
