@@ -12,8 +12,10 @@ const { stageRelease, verifyRuntime } = require('../server/runtime-update.cjs');
 const repo = path.resolve(__dirname, '..');
 const args = process.argv.slice(2);
 const value = name => args.includes(name) ? args[args.indexOf(name) + 1] : undefined;
+// Keep the outer wrapper short: Windows CreateProcess still limits cwd length,
+// even though Node can extract individual files with much longer paths.
 const root = path.resolve(value('--work') || path.join(repo, 'test-results'),
-  `${process.platform}-${process.arch}-${randomUUID()}`);
+  `check-${randomUUID().slice(0, 8)}`);
 
 function run(...arguments_) {
   const result = spawnSync(process.execPath, arguments_, { cwd: repo, stdio: 'inherit', windowsHide: true });

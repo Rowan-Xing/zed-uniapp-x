@@ -6,7 +6,7 @@ The project reuses DCloud's local semantics to support uni-app x editing in Zed.
 
 - UTS and UVUE completion, details, definitions, hover, and type diagnostics.
 - Ordinary script and script setup; diagnostics after unsaved edits.
-- Real-runtime regression tests, isolated fixtures, and Windows CI.
+- Real-runtime regression tests, isolated fixtures, and Windows/Apple Silicon macOS CI.
 - Stable-runtime discovery, checksum checks, validation before activation, and rollback.
 - Zed API downloads for the versioned bridge and official runtime.
 - First-launch installation, explicit grammar declarations, and English user documentation.
